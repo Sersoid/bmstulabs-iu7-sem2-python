@@ -53,52 +53,43 @@ class Application(QtWidgets.QMainWindow, qt_ui.Ui_MainWindow):
         self.setupUi(self)
 
         # Кнопки с цифрами
-        self.Button0.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "0")])
-        self.Button1.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "1")])
-        self.Button2.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "2")])
-        self.Button3.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "3")])
-        self.Button4.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "4")])
-        self.Button5.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "5")])
-        self.Button6.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "6")])
-        self.Button7.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "7")])
-        self.Button8.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "8")])
-        self.Button9.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "9")])
-        self.ButtonA.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "A")])
-        self.ButtonB.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "B")])
-        self.ButtonC.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "C")])
-        self.ButtonD.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "D")])
-        self.ButtonE.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "E")])
-        self.ButtonF.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                              self.LineEdit.setText(self.LineEdit.text() + "F")])
+        self.Button0.clicked.connect(self.on_numeric_button_click("0"))
+        self.Button1.clicked.connect(self.on_numeric_button_click("1"))
+        self.Button2.clicked.connect(self.on_numeric_button_click("2"))
+        self.Button3.clicked.connect(self.on_numeric_button_click("3"))
+        self.Button4.clicked.connect(self.on_numeric_button_click("4"))
+        self.Button5.clicked.connect(self.on_numeric_button_click("5"))
+        self.Button6.clicked.connect(self.on_numeric_button_click("6"))
+        self.Button7.clicked.connect(self.on_numeric_button_click("7"))
+        self.Button8.clicked.connect(self.on_numeric_button_click("8"))
+        self.Button9.clicked.connect(self.on_numeric_button_click("9"))
+        self.ButtonA.clicked.connect(self.on_numeric_button_click("A"))
+        self.ButtonB.clicked.connect(self.on_numeric_button_click("B"))
+        self.ButtonC.clicked.connect(self.on_numeric_button_click("C"))
+        self.ButtonD.clicked.connect(self.on_numeric_button_click("D"))
+        self.ButtonE.clicked.connect(self.on_numeric_button_click("E"))
+        self.ButtonF.clicked.connect(self.on_numeric_button_click("F"))
 
         # Служебные кнопки
-        self.ButtonClear.clicked.connect(lambda: self.clean_up(True))
-        self.ButtonPlus.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                                 self.LineEdit.setText(self.LineEdit.text() + "+")])
-        self.ButtonMinus.clicked.connect(lambda: [self.clean_up(self.need_clean_up),
-                                                  self.LineEdit.setText(self.LineEdit.text() + "-")])
+        self.ButtonPlus.clicked.connect(self.on_plus_minus_button_click(True))
+        self.ButtonMinus.clicked.connect(self.on_plus_minus_button_click(False))
         self.ButtonEquals.clicked.connect(self.do_math)
 
-    # Очистка поля
-    def clean_up(self, check: bool) -> None:
-        if check:
-            self.LineEdit.setText("")
-        self.need_clean_up = False
+    def on_numeric_button_click(self, number):
+        def action():
+            if self.need_clean_up:
+                self.LineEdit.clear()
+                self.need_clean_up = False
+            self.LineEdit.setText(self.LineEdit.text() + number)
+
+        return action
+
+    def on_plus_minus_button_click(self, is_plus: bool):
+        def action():
+            self.LineEdit.setText(self.LineEdit.text() + "+" if is_plus else "-"),
+            self.need_clean_up = False
+
+        return action
 
     # Вычисление значения введенного выражения
     def do_math(self):
@@ -123,7 +114,7 @@ class Application(QtWidgets.QMainWindow, qt_ui.Ui_MainWindow):
             self.need_clean_up = True
         else:
             # Виджет ошибки нужно добавить
-            self.clean_up(True)
+            self.LineEdit.clear()
 
 
 if __name__ == "__main__":
