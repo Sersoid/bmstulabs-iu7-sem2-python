@@ -12,10 +12,7 @@
 # Импорт модулей
 import re
 import sys
-from PyQt6 import QtWidgets
-
-# Импорт файла интерфейса
-import qt_ui
+from PyQt6 import QtWidgets, uic, QtGui
 
 
 # Шестнадцатеричное число в десятеричное
@@ -45,55 +42,61 @@ def int_to_hex(int_value: int) -> str:
 
 
 # Класс приложения
-class Application(QtWidgets.QMainWindow, qt_ui.Ui_MainWindow):
+class MainUI(QtWidgets.QMainWindow):
     def __init__(self):
         # Инициализация
-        super().__init__()
+        super(MainUI, self).__init__()
+        uic.loadUi("ui/main.ui", self)
+
+        # Переменные
+        self.about_window = AboutUI()
         self.need_clean_up = False
-        self.setupUi(self)
 
         # Кнопки с цифрами
-        self.Button0.clicked.connect(self.on_numeric_button_click("0"))
-        self.Button1.clicked.connect(self.on_numeric_button_click("1"))
-        self.Button2.clicked.connect(self.on_numeric_button_click("2"))
-        self.Button3.clicked.connect(self.on_numeric_button_click("3"))
-        self.Button4.clicked.connect(self.on_numeric_button_click("4"))
-        self.Button5.clicked.connect(self.on_numeric_button_click("5"))
-        self.Button6.clicked.connect(self.on_numeric_button_click("6"))
-        self.Button7.clicked.connect(self.on_numeric_button_click("7"))
-        self.Button8.clicked.connect(self.on_numeric_button_click("8"))
-        self.Button9.clicked.connect(self.on_numeric_button_click("9"))
-        self.ButtonA.clicked.connect(self.on_numeric_button_click("A"))
-        self.ButtonB.clicked.connect(self.on_numeric_button_click("B"))
-        self.ButtonC.clicked.connect(self.on_numeric_button_click("C"))
-        self.ButtonD.clicked.connect(self.on_numeric_button_click("D"))
-        self.ButtonE.clicked.connect(self.on_numeric_button_click("E"))
-        self.ButtonF.clicked.connect(self.on_numeric_button_click("F"))
+        self.button0.clicked.connect(self.on_numeric_button_click("0"))
+        self.button1.clicked.connect(self.on_numeric_button_click("1"))
+        self.button2.clicked.connect(self.on_numeric_button_click("2"))
+        self.button3.clicked.connect(self.on_numeric_button_click("3"))
+        self.button4.clicked.connect(self.on_numeric_button_click("4"))
+        self.button5.clicked.connect(self.on_numeric_button_click("5"))
+        self.button6.clicked.connect(self.on_numeric_button_click("6"))
+        self.button7.clicked.connect(self.on_numeric_button_click("7"))
+        self.button8.clicked.connect(self.on_numeric_button_click("8"))
+        self.button9.clicked.connect(self.on_numeric_button_click("9"))
+        self.buttonA.clicked.connect(self.on_numeric_button_click("A"))
+        self.buttonB.clicked.connect(self.on_numeric_button_click("B"))
+        self.buttonC.clicked.connect(self.on_numeric_button_click("C"))
+        self.buttonD.clicked.connect(self.on_numeric_button_click("D"))
+        self.buttonE.clicked.connect(self.on_numeric_button_click("E"))
+        self.buttonF.clicked.connect(self.on_numeric_button_click("F"))
 
         # Служебные кнопки
-        self.ButtonPlus.clicked.connect(self.on_plus_minus_button_click(True))
-        self.ButtonMinus.clicked.connect(self.on_plus_minus_button_click(False))
-        self.ButtonEquals.clicked.connect(self.do_math)
+        self.buttonPlus.clicked.connect(self.on_plus_minus_button_click(True))
+        self.buttonMinus.clicked.connect(self.on_plus_minus_button_click(False))
+        self.buttonEquals.clicked.connect(self.do_math)
+
+        # Строка меню
+        self.actionAbout.triggered.connect(self.about_window.show)
 
     def on_numeric_button_click(self, number):
         def action():
             if self.need_clean_up:
-                self.LineEdit.clear()
+                self.lineEdit.clear()
                 self.need_clean_up = False
-            self.LineEdit.setText(self.LineEdit.text() + number)
+            self.lineEdit.setText(self.lineEdit.text() + number)
 
         return action
 
     def on_plus_minus_button_click(self, is_plus: bool):
         def action():
-            self.LineEdit.setText(self.LineEdit.text() + "+" if is_plus else "-"),
+            self.lineEdit.setText(self.lineEdit.text() + ("+" if is_plus else "-")),
             self.need_clean_up = False
 
         return action
 
     # Вычисление значения введенного выражения
     def do_math(self):
-        search = re.search(r"[+-]?[ ]*[0-9a-fA-F]+([ ]*[+-][ ]*[0-9a-fA-F]+)+", self.LineEdit.text())
+        search = re.search(r"[+-]?[ ]*[0-9a-fA-F]+([ ]*[+-][ ]*[0-9a-fA-F]+)+", self.lineEdit.text())
         if search:
             answer = 0
             expression = search.group()
@@ -108,17 +111,27 @@ class Application(QtWidgets.QMainWindow, qt_ui.Ui_MainWindow):
                 expression = expression[len(expression_search.group()):]
                 expression_search = re.search(r"[+-]?[ ]*[0-9a-fA-F]+", expression)
             if answer < 0:
-                self.LineEdit.setText("-" + int_to_hex(-answer))
+                self.lineEdit.setText("-" + int_to_hex(-answer))
             else:
-                self.LineEdit.setText(int_to_hex(answer))
+                self.lineEdit.setText(int_to_hex(answer))
             self.need_clean_up = True
         else:
             # Виджет ошибки нужно добавить
-            self.LineEdit.clear()
+            self.lineEdit.clear()
+
+
+class AboutUI(QtWidgets.QMainWindow):
+    def __init__(self):
+        # Инициализация
+        super(AboutUI, self).__init__()
+        self.window = uic.loadUi("ui/about.ui", self)
+
+        # Привязка картинки LabelLogo
+        self.labelLogo.setPixmap(QtGui.QPixmap("ui/logo.png"))
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    window = Application()
+    window = MainUI()
     window.show()
     app.exec()
