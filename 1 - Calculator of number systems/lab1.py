@@ -12,11 +12,14 @@
 # Импорт модулей
 import re
 import sys
-from PyQt6 import QtWidgets, uic, QtGui
+from typing import Callable
+from PyQt6 import QtWidgets, uic
+from PyQt6.QtGui import QPixmap
 
 
 # Шестнадцатеричное число в десятеричное
 def hex_to_int(hex_value: str) -> int:
+    hex_value = hex_value.upper()
     hex_translate = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
                      "A": 10, "B": 11, "C": 12, "D": 13, "E": 14, "F": 15}
 
@@ -51,6 +54,7 @@ class MainUI(QtWidgets.QMainWindow):
         # Переменные
         self.about_window = AboutUI()
         self.need_clean_up = False
+        self.is_error = False
 
         # Кнопки с цифрами
         self.button0.clicked.connect(self.on_numeric_button_click("0"))
@@ -78,25 +82,28 @@ class MainUI(QtWidgets.QMainWindow):
         # Строка меню
         self.actionAbout.triggered.connect(self.about_window.show)
 
-    def on_numeric_button_click(self, number):
+    def on_numeric_button_click(self, number) -> Callable:
         def action():
-            if self.need_clean_up:
+            if self.need_clean_up or self.is_error:
                 self.lineEdit.clear()
-                self.need_clean_up = False
+                self.need_clean_up = self.is_error = False
             self.lineEdit.setText(self.lineEdit.text() + number)
 
         return action
 
-    def on_plus_minus_button_click(self, is_plus: bool):
+    def on_plus_minus_button_click(self, is_plus: bool) -> Callable:
         def action():
+            if self.is_error:
+                self.lineEdit.clear()
+                self.is_error = False
             self.lineEdit.setText(self.lineEdit.text() + ("+" if is_plus else "-")),
             self.need_clean_up = False
 
         return action
 
     # Вычисление значения введенного выражения
-    def do_math(self):
-        search = re.search(r"[+-]?[ ]*[0-9a-fA-F]+([ ]*[+-][ ]*[0-9a-fA-F]+)+", self.lineEdit.text())
+    def do_math(self) -> None:
+        search = re.search(r"[+-]?[ ]*[0-9a-fA-F]+([ ]*[+-][ ]*[0-9a-fA-F]+)*", self.lineEdit.text())
         if search:
             answer = 0
             expression = search.group()
@@ -116,8 +123,8 @@ class MainUI(QtWidgets.QMainWindow):
                 self.lineEdit.setText(int_to_hex(answer))
             self.need_clean_up = True
         else:
-            # Виджет ошибки нужно добавить
-            self.lineEdit.clear()
+            self.lineEdit.setText("Error!")
+            self.is_error = True
 
 
 class AboutUI(QtWidgets.QMainWindow):
@@ -127,7 +134,7 @@ class AboutUI(QtWidgets.QMainWindow):
         self.window = uic.loadUi("ui/about.ui", self)
 
         # Привязка картинки LabelLogo
-        self.labelLogo.setPixmap(QtGui.QPixmap("ui/logo.png"))
+        self.labelLogo.setPixmap(QPixmap("ui/logo.png"))
 
 
 if __name__ == "__main__":

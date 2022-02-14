@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>512</width>
+    <width>550</width>
     <height>146</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>512</width>
+    <width>550</width>
     <height>146</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>512</width>
+    <width>550</width>
     <height>146</height>
    </size>
   </property>
@@ -78,8 +78,5 @@
    </layout>
   </widget>
  </widget>
- <resources>
-  <include location="about.qrc"/>
- </resources>
  <connections/>
 </ui>
