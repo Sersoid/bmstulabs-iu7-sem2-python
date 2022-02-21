@@ -18,30 +18,41 @@ from PyQt6.QtGui import QPixmap
 
 
 # Шестнадцатеричное число в десятеричное
-def hex_to_int(hex_value: str) -> int:
-    hex_value = hex_value.upper()
+def hex_to_int(value: str) -> float:
+    value = value.upper()
+    split_value = value.split(".")
+    int_part, fract_part = split_value[0], split_value[1] if len(split_value) == 2 and split_value[1] else "0"
     hex_translate = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
                      "A": 10, "B": 11, "C": 12, "D": 13, "E": 14, "F": 15}
 
-    int_value = 0
-    for degree in range(len(hex_value) - 1, -1, -1):
-        int_value += hex_translate[hex_value[len(hex_value) - 1 - degree]] * 16 ** degree
+    result = 0
+    for degree in range(len(int_part) - 1, -1 - len(fract_part), -1):
+        if degree >= 0:
+            result += hex_translate[int_part[len(int_part) - 1 - degree]] * 16 ** degree
+        else:
+            result += hex_translate[fract_part[-degree - 1]] * 16 ** degree
 
-    return int_value
+    return float(result)
 
 
 # Десятеричное число в шестнадцатеричное
-def int_to_hex(int_value: int) -> str:
+def int_to_hex(value: float) -> str:
+    int_part, fract_part = divmod(value, 1)
     int_translate = {0: "0", 1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9",
                      10: "A", 11: "B", 12: "C", 13: "D", 14: "E", 15: "F"}
 
-    hex_value = ""
-    while int_value // 16 != 0:
-        hex_value += int_translate[int_value % 16]
-        int_value //= 16
-    hex_value += int_translate[int_value]
+    result = ""
+    while int_part // 16 != 0:
+        result += int_translate[int_part % 16]
+        int_part //= 16
+    result += int_translate[int_part]
+    result = result[::-1] + "."
+    for i in range(8):
+        fract_part *= 16
+        result += int_translate[fract_part // 1]
+        fract_part = fract_part % 1
 
-    return hex_value[::-1]
+    return result
 
 
 # Класс приложения
@@ -77,6 +88,7 @@ class MainUI(QtWidgets.QMainWindow):
         # Служебные кнопки
         self.buttonPlus.clicked.connect(self.on_plus_minus_button_click(True))
         self.buttonMinus.clicked.connect(self.on_plus_minus_button_click(False))
+        self.buttonDot.clicked.connect(self.on_numeric_button_click("."))
         self.buttonEquals.clicked.connect(self.do_math)
 
         # Строка меню
@@ -103,11 +115,12 @@ class MainUI(QtWidgets.QMainWindow):
 
     # Вычисление значения введенного выражения
     def do_math(self) -> None:
-        search = re.search(r"[+-]?[ ]*[0-9a-fA-F]+([ ]*[+-][ ]*[0-9a-fA-F]+)*", self.lineEdit.text())
+        search = re.search(r"[+-]?[ ]*([0-9a-fA-F]+\.?[0-9a-fA-F]+)+([ ]*[+-][ ]*([0-9a-fA-F]\.?[0-9a-fA-F]+)+)*",
+                           self.lineEdit.text())
         if search:
             answer = 0
             expression = search.group()
-            expression_search = re.search(r"[+-]?[ ]*[0-9a-fA-F]+", expression)
+            expression_search = re.search(r"[+-]?[ ]*([0-9a-fA-F]+\.?[0-9a-fA-F]+)+", expression)
             while expression_search:
                 if expression_search.group()[0] == "-":
                     answer -= hex_to_int(expression_search.group()[1:])
@@ -116,7 +129,7 @@ class MainUI(QtWidgets.QMainWindow):
                 else:
                     answer += hex_to_int(expression_search.group())
                 expression = expression[len(expression_search.group()):]
-                expression_search = re.search(r"[+-]?[ ]*[0-9a-fA-F]+", expression)
+                expression_search = re.search(r"[+-]?[ ]*([0-9a-fA-F]+\.?[0-9a-fA-F]+)+", expression)
             if answer < 0:
                 self.lineEdit.setText("-" + int_to_hex(-answer))
             else:
