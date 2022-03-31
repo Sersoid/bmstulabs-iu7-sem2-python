@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Encode message into .bmp file</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>logo.png</normaloff>logo.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -55,7 +59,7 @@
      </spacer>
     </item>
     <item row="4" column="1" colspan="2">
-     <widget class="QPushButton" name="enter_button">
+     <widget class="QPushButton" name="encode_button">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -110,7 +114,7 @@
      </widget>
     </item>
     <item row="3" column="1" colspan="2">
-     <widget class="QLineEdit" name="text"/>
+     <widget class="QLineEdit" name="encode_text"/>
     </item>
    </layout>
   </widget>
@@ -120,22 +124,34 @@
      <x>0</x>
      <y>0</y>
      <width>796</width>
-     <height>30</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="action_decode"/>
    </widget>
    <widget class="QMenu" name="menu_about">
     <property name="title">
      <string>About</string>
     </property>
+    <addaction name="action_about"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_about"/>
   </widget>
+  <action name="action_about">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="action_decode">
+   <property name="text">
+    <string>Decode</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
