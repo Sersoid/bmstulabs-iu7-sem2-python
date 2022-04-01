@@ -1,7 +1,10 @@
 from io import BytesIO
-from PyQt6 import QtWidgets, uic
-from PyQt6.QtGui import QPixmap
+
+import imghdr
 from PIL import Image
+from PyQt6 import QtWidgets, uic
+from PyQt6.QtCore import QRegularExpression
+from PyQt6.QtGui import QPixmap, QRegularExpressionValidator
 import sys
 from typing import Callable
 
@@ -16,6 +19,8 @@ class EncodeUI(QtWidgets.QMainWindow):
 
         self.file = None
         self.file_button.clicked.connect(self.on_file_button_click())
+        self.encode_text_validator = QRegularExpressionValidator(QRegularExpression(f"[ -~]*"))
+        self.encode_text.setValidator(self.encode_text_validator)
         self.encode_button.clicked.connect(self.on_encode_button_click())
 
         self.action_decode.triggered.connect(self.on_action_decode())
@@ -39,7 +44,12 @@ class EncodeUI(QtWidgets.QMainWindow):
     def on_file_button_click(self) -> Callable:
         def action():
             self.file = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "./", "Image *.bmp")[0]
-            self.file_label.setText(f"Выбранный файл: {self.file}")
+            if imghdr.what(self.file) == "bmp":
+                self.file_label.setText(f"Выбранный файл: {self.file}")
+            else:
+                print("Can't resolve this file")
+                self.file = None
+                self.file_label.setText(f"Выбранный файл:")
             self.init_image_preview()
 
         return action
@@ -65,7 +75,7 @@ class EncodeUI(QtWidgets.QMainWindow):
                 with open(f"{self.file[:-4]}_new.bmp", 'wb') as new_image:
                     new_image.write(bytes(int_values))
             else:
-                print("FUCK")
+                print("The entered string doesn't fit into the file")
 
         return action
 
@@ -143,10 +153,10 @@ class AboutUI(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    about_window = AboutUI()
-    encode_window = EncodeUI(about_window)
-    decode_window = DecodeUI(about_window)
-    encode_window.set_decode_window(decode_window)
-    decode_window.set_encode_window(encode_window)
-    encode_window.show()
+    about = AboutUI()
+    encode = EncodeUI(about)
+    decode = DecodeUI(about)
+    encode.set_decode_window(decode)
+    decode.set_encode_window(encode)
+    encode.show()
     app.exec()
