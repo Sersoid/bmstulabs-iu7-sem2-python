@@ -44,12 +44,16 @@ class EncodeUI(QtWidgets.QMainWindow):
     def on_file_button_click(self) -> Callable:
         def action():
             self.file = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", "./", "Image *.bmp")[0]
-            if imghdr.what(self.file) == "bmp":
-                self.file_label.setText(f"Выбранный файл: {self.file}")
+            if self.file:
+                if imghdr.what(self.file) == "bmp":
+                    self.file_label.setText(f"Выбранный файл: {self.file}")
+                else:
+                    print("Can't resolve this file")
+                    self.file = None
+                    self.file_label.setText(f"Выбранный файл:")
             else:
-                print("Can't resolve this file")
+                print("File not selected")
                 self.file = None
-                self.file_label.setText(f"Выбранный файл:")
             self.init_image_preview()
 
         return action
