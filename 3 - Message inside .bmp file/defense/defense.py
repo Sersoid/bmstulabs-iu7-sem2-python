@@ -64,7 +64,7 @@ class EncodeUI(QtWidgets.QMainWindow):
             int_values = list(buf.getvalue())
 
             data = self.encode_text.text()
-            data_limit = (len(int_values) - 54) // 3 * 2
+            data_limit = len(int_values) - 54
 
             bin_data = [0] * (32 - len(bin(len(data))[2:])) + [int(bit) for bit in bin(len(data))[2:]]
             for char in data:
@@ -72,13 +72,12 @@ class EncodeUI(QtWidgets.QMainWindow):
                     bin_data.append(bit)
 
             if len(bin_data) <= data_limit:
-                for i in range(54, 54 + (len(bin_data) // 2 + 1) * 3, 3):
-                    for j in range(2):
-                        try:
-                            int_values[i + j] = int(bin(int_values[i + j])[2:-1] + str(bin_data[(i - 54) // 3 * 2 + j]), 2)
-                        except IndexError:
-                            print("Data end")
-                            break
+                for i in range(54, 54 + len(bin_data) // 2 + 1):
+                    try:
+                        bin_value = bin(int_values[i])[2:]
+                        int_values[i] = int(str(bin_data[(i - 54) * 2]) + str(bin_data[(i - 54) * 2 + 1]) + ("0" * (8 - len(bin_value)) + bin_value)[2:], 2)
+                    except IndexError:
+                        print("Data end")
 
                 with open(f"{self.file[:-4]}_new.bmp", 'wb') as new_image:
                     new_image.write(bytes(int_values))
@@ -133,17 +132,17 @@ class DecodeUI(QtWidgets.QMainWindow):
             int_values = list(buf.getvalue())
 
             message_length = ""
-            for i in range(54, 102, 3):
-                for j in range(2):
-                    message_length += bin(int_values[i + j])[-1]
+            for i in range(54, 70):
+                bin_value = bin(int_values[i])[2:]
+                message_length += ("0" * (8 - len(bin_value)) + bin_value)[:2]
             message_length = int(message_length[2:], 2)
 
             decode_text = ""
-            for i in range(102, 102 + 12 * message_length, 12):
+            for i in range(70, 70 + 4 * message_length, 4):
                 bin_char = ""
-                for j in range(i, i + 12, 3):
-                    for g in range(2):
-                        bin_char += bin(int_values[j + g])[-1]
+                for j in range(i, i + 4):
+                    bin_value = bin(int_values[j])[2:]
+                    bin_char += ("0" * (8 - len(bin_value)) + bin_value)[:2]
                 decode_text += chr(int(bin_char, 2))
 
             self.decode_text.setText(f"Декодированный текст: {decode_text}")
