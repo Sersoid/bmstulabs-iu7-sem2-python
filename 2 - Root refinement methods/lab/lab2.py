@@ -133,7 +133,7 @@ class GraphUI(QtWidgets.QMainWindow):
     def init_canvas(self):
         temp = self.a
 
-        while self.b > temp:
+        while self.b >= temp:
             self.x_values.append(temp)
             self.y_values.append(self.function(temp))
             temp += self.h
@@ -159,29 +159,19 @@ class GraphUI(QtWidgets.QMainWindow):
                                  color="green")
 
     def update_table(self):
-        counter = 1
-        flag = 0
-
         for i in range(len(self.y_values) - 1):
-            if flag:
-                flag = 0
-                continue
+            x_result = half_division(self.function, self.x_values[i], self.x_values[i + 1], self.nmax, self.eps)
+            y_result = self.function(x_result)
 
-            if self.y_values[i] <= 0 <= self.y_values[i + 1] or self.y_values[i + 1] <= 0 <= self.y_values[i]:
-                x_result = half_division(self.function, self.x_values[i], self.x_values[i + 1], self.nmax, self.eps)
-                y_result = self.function(x_result)
-
+            if equals_with_eps(y_result, 0, self.eps):
                 self.canvas.axes.scatter(x_result, y_result, color="blue")
 
                 row_number = self.table.rowCount()
                 self.table.insertRow(row_number)
                 self.table.setItem(row_number, 0, QtWidgets.QTableWidgetItem(f"[{format(self.x_values[i], '.5g')}; "
                                                                              f"{format(self.x_values[i + 1], '.5g')}]"))
-                self.table.setItem(row_number, 1, QtWidgets.QTableWidgetItem(str(format(x_result, '.5g'))))
-                self.table.setItem(row_number, 2, QtWidgets.QTableWidgetItem(str(format(y_result, '.5g'))))
-
-                counter += 1
-                flag = 1
+                self.table.setItem(row_number, 1, QtWidgets.QTableWidgetItem(str(format(x_result, ".5g"))))
+                self.table.setItem(row_number, 2, QtWidgets.QTableWidgetItem(str(format(y_result, ".5g"))))
 
 
 if __name__ == "__main__":
