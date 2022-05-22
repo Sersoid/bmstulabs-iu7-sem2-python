@@ -1,10 +1,12 @@
 import arcade
 from math import sqrt
 
+# Window settings
 SCREEN_WIDTH = 576
 SCREEN_HEIGHT = 576
 SCREEN_TITLE = "Lab 5 - Animation"
 
+# Movement vectors
 PERSON_MOVEMENT_VECTOR = [
     (176, 288),
     (176, 400),
@@ -68,9 +70,12 @@ ENEMY_MOVEMENT_VECTOR = [
     (208, 272),
     (304, 368)
 ]
+
+# Movement speed
 MOVEMENT_SPEED = 2
 
 
+# Entity class
 class Entity:
     def __init__(self, width, height, color):
         self.center_x = 0
@@ -92,6 +97,7 @@ class Entity:
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
 
 
+# Main class
 class Main(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
@@ -114,34 +120,30 @@ class Main(arcade.Window):
         self.generate_sprites()
 
     def generate_sprites(self):
-        layer_options = {
-            "Стены": {
-                "use_spatial_hash": True,
-            },
-            "Пол": {
-                "use_spatial_hash": True,
-            }
-        }
-
-        self.tile_map = arcade.load_tilemap("map.tmx", 1, layer_options)
+        # Map initialization
+        self.tile_map = arcade.load_tilemap("map.tmx", 1)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         self.wall_list = self.scene.get_sprite_list("Стены")
         self.floor_list = self.scene.get_sprite_list("Пол")
 
+        # "Person" initialization
         self.person = Entity(16, 16, arcade.color.YELLOW)
         self.person.center_x = 272
         self.person.center_y = 288
 
+        # "Enemy" initialization
         self.enemy = Entity(16, 16, arcade.color.RED)
         self.enemy.center_x = 304
         self.enemy.center_y = 288
 
+    # Render
     def on_draw(self):
         self.floor_list.draw()
         self.wall_list.draw()
         self.person.draw()
         self.enemy.draw()
 
+    # Update
     def on_update(self, delta):
         def get_deltas(to_values, from_values):
             return to_values[0] - from_values[0], to_values[1] - from_values[1]
@@ -150,7 +152,9 @@ class Main(arcade.Window):
             return sqrt(x ** 2 + y ** 2)
 
         # Person movement
-        delta_x, delta_y = get_deltas((PERSON_MOVEMENT_VECTOR[self.person_to][0], (PERSON_MOVEMENT_VECTOR[self.person_to][1])), (self.person.center_x, self.person.center_y))
+        delta_x, delta_y = get_deltas((PERSON_MOVEMENT_VECTOR[self.person_to][0],
+                                       (PERSON_MOVEMENT_VECTOR[self.person_to][1])),
+                                      (self.person.center_x, self.person.center_y))
         if get_distance(delta_x, delta_y) <= MOVEMENT_SPEED:
             self.person.change_x = delta_x
             self.person.change_y = delta_y
@@ -161,7 +165,9 @@ class Main(arcade.Window):
             self.person.change_y = delta_y * k
 
         # Enemy movement
-        delta_x, delta_y = get_deltas((ENEMY_MOVEMENT_VECTOR[self.enemy_to][0], (ENEMY_MOVEMENT_VECTOR[self.enemy_to][1])), (self.enemy.center_x, self.enemy.center_y))
+        delta_x, delta_y = get_deltas((ENEMY_MOVEMENT_VECTOR[self.enemy_to][0],
+                                       (ENEMY_MOVEMENT_VECTOR[self.enemy_to][1])),
+                                      (self.enemy.center_x, self.enemy.center_y))
         if get_distance(delta_x, delta_y) <= MOVEMENT_SPEED:
             self.enemy.change_x = delta_x
             self.enemy.change_y = delta_y
@@ -175,6 +181,7 @@ class Main(arcade.Window):
         self.enemy.update()
 
 
+# Start point
 if __name__ == "__main__":
     Main(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     arcade.run()
